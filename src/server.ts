@@ -1,29 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import express from "express";
+import { router } from "./routes";
 
-const prisma = new PrismaClient();
+const app = express();
 
-async function main() {
-  console.log("Comecando o teste de banco...");
-  const categoria = await prisma.category.create({
-    data: {
-      name: "Lazer",
-    },
-  });
-  console.log("Categoria criada: ", categoria);
+app.use(express.json());
+app.use(router);
 
-  const despesa = await prisma.transaction.create({
-    data: {
-      title: "CinemaL Homem Aranha",
-      amount: 45.5,
-      type: "expense",
-      categoryId: categoria.id,
-    },
-  });
-  console.log("Transacao vinculada criada: ", despesa);
-}
-
-main()
-  .catch((e) => console.error(e))
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+app.listen(3333, () => {
+  console.log("🚀 Server running on port 3333");
+});
