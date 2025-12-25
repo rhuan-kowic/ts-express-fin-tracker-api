@@ -16,12 +16,14 @@ export class TransactionController {
         req.body
       );
 
+      const userId = req.user.id;
       const transaction = await prisma.transaction.create({
         data: {
           title,
           amount,
           type,
           categoryId,
+          userId,
         },
       });
 
@@ -34,7 +36,12 @@ export class TransactionController {
   }
 
   async list(req: Request, res: Response) {
+    const userId = req.user.id;
+
     const transactions = await prisma.transaction.findMany({
+      where: {
+        userId: userId,
+      },
       include: {
         category: true,
       },
@@ -67,6 +74,19 @@ export class TransactionController {
 
     try {
       const { id } = deleteParams.parse(req.params);
+      const userId = req.user.id;
+
+      const transaction = await prisma.transaction.findUnique({
+        where: { id: id },
+      });
+
+      if (!transaction) {
+        return res.status(404).json({ error: "Transação não encontrada." });
+      }
+
+      if (transaction.userId !== userId) {
+        return res.status(403).json({ error: "Não autorizado." });
+      }
 
       await prisma.transaction.delete({
         where: { id: id },

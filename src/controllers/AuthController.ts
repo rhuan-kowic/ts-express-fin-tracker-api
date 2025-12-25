@@ -33,7 +33,10 @@ export class AuthController {
       throw new Error("JWT_SECRET não definido no .env");
     }
 
-    const token = sign({ id: user.id }, secret, { expiresIn: "7d" });
+    const token = sign({}, secret, {
+      subject: String(user.id),
+      expiresIn: "7d",
+    });
 
     return res.json({
       user: {
